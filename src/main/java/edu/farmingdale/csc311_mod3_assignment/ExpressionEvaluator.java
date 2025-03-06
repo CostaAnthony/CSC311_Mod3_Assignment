@@ -1,15 +1,32 @@
 package edu.farmingdale.csc311_mod3_assignment;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 public class ExpressionEvaluator {
-    // Method to evaluate the expression
-    public static String evaluate(String expression) {
+
+    // Method to evaluate the expression and check if numbers match the cards
+    public static String evaluate(String expression, Set<String> cards) {
         try {
+            // Convert the displayed cards to numeric values for evaluation
+            Set<Double> numericCards = convertCardsToNumeric(cards);
+
             // Tokenize the expression
             List<String> tokens = tokenize(expression);
+
+            // Check if numbers match the displayed cards and ensure no duplicates
+            Set<Double> numbersUsed = new HashSet<>();
+            for (String token : tokens) {
+                if (isNumber(token)) {
+                    double num = Double.parseDouble(token);
+                    if (!numericCards.contains(num)) {
+                        return "Error: " + num + " is not a valid card.";
+                    }
+                    if (numbersUsed.contains(num)) {
+                        return "Error: " + num + " is repeated in the expression.";
+                    }
+                    numbersUsed.add(num);
+                }
+            }
 
             // Convert to postfix notation using Shunting Yard algorithm
             List<String> postfix = infixToPostfix(tokens);
@@ -26,6 +43,52 @@ public class ExpressionEvaluator {
 
         } catch (Exception e) {
             return "Error: " + e.getMessage();
+        }
+    }
+
+    // Converts card names to their numeric values (e.g., "king_of_hearts" -> 10)
+    private static Set<Double> convertCardsToNumeric(Set<String> cards) {
+        Set<Double> numericCards = new HashSet<>();
+        for (String card : cards) {
+            double cardValue = getCardValue(card);
+            numericCards.add(cardValue);  // Add each card's numeric value to the set
+        }
+        return numericCards;
+    }
+
+    // Maps card names to their numeric values
+    private static double getCardValue(String card) {
+        String cardName = card.split("_")[0].toLowerCase();  // Get the card rank (e.g., "king", "two", etc.)
+
+        switch (cardName) {
+            case "ace":
+                return 1;
+            case "two":
+                return 2;
+            case "three":
+                return 3;
+            case "four":
+                return 4;
+            case "five":
+                return 5;
+            case "six":
+                return 6;
+            case "seven":
+                return 7;
+            case "eight":
+                return 8;
+            case "nine":
+                return 9;
+            case "ten":
+                return 10;
+            case "jack":
+                return 11;
+            case "queen":
+                return 12;
+            case "king":
+                return 13;
+            default:
+                throw new IllegalArgumentException("Invalid card rank: " + cardName);
         }
     }
 
